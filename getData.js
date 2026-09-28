@@ -295,7 +295,12 @@ const basePromise = new Promise((resolve, reject) => {
         view: "Grid view"
     }).eachPage(function page(records, fetchNextPage) {
         records.forEach(function(record) {
+            // Airtable's own creation timestamp is the only date left to order by (the
+            // "Project Completed Year/Season" fields no longer exist), so keep it before the
+            // record is reduced to its fields.
+            const createdTime = record._rawJson && record._rawJson.createdTime;
             record = record.fields;
+            if (createdTime) record.__createdTime = createdTime;
             if(record['Image Link'] && record['Mentee Name']){
                 airtableData.push(record)
             }
@@ -356,6 +361,7 @@ const basePromise = new Promise((resolve, reject) => {
             tempObj["publications"] = item["Publications"];
             tempObj["science_fairs"] = item["Science Fairs"];
             tempObj["publication_link"] = item["Publication Link"];
+            tempObj["created_at"] = item.__createdTime || null;
             projectData.projects.push(tempObj);
 
             // tempObj.domains.forEach(topic => projectData.topics.add(topic));
@@ -375,6 +381,20 @@ const basePromise = new Promise((resolve, reject) => {
             }
             return array;
         }
+
+        // The front page reuses the server-rendered cards as-is instead of re-sorting them, so
+        // the build must emit projects already in display order: published first, then newest
+        // first — the same rule as dataService.sortProjects. This has to run before related_proj
+        // below, because related projects are stored as indices into this array.
+        const createdMs = (project) => {
+            const t = Date.parse(project.created_at || '');
+            return Number.isNaN(t) ? 0 : t;
+        };
+        projectData.projects.sort((a, b) => {
+            const published = (b.published === true ? 1 : 0) - (a.published === true ? 1 : 0);
+            if (published !== 0) return published;
+            return createdMs(b) - createdMs(a);
+        });
 
         let projData = {}
         projData.projects = projectData.projects.map((item, curr_index) => {
