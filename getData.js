@@ -557,23 +557,35 @@ Promise.all([domainsPromise, basePromise]).then(() => {
             let research_paper_api_link = `https://www.googleapis.com/drive/v3/files/${research_paper_id}?key=${process.env.GOOGLE_API_KEY}&alt=media`
 
 
-            let research_paper_promise = new Promise((resolve, reject) => {
-                https.get(research_paper_api_link, res => {
-                    const local_id = crypto.createHash('sha1').update(`${research_paper_id}${research_paper_id}`).digest('hex');
-                    const research_paper_local_url = `./src/assets/pdfs/${local_id}.pdf`
-                    const file = fs.createWriteStream(research_paper_local_url)
-                    res.pipe(file)
-                    file.on('finish', () => {
-                        file.close()
-                        console.log(`PDF downloaded!`)
+            // This used to pipe whatever Drive answered straight into a .pdf, status
+            // and content unchecked. Google's 404 page echoes the request URL - API
+            // key included - so four "PDFs" in dist were HTML pages carrying the key,
+            // and Google flagged it (2026-10-06). Now: go through downloadFile (status
+            // 200, not text/html, complete body), then insist on a real %PDF header;
+            // anything else is deleted and the project keeps its Drive link.
+            const local_id = crypto.createHash('sha1').update(`${research_paper_id}${research_paper_id}`).digest('hex');
+            const research_paper_local_path = path.join(__dirname, "src", "assets", "pdfs", `${local_id}.pdf`)
+            const isPdf = f => {
+                try {
+                    const fd = fs.openSync(f, "r"); const b = Buffer.alloc(5)
+                    fs.readSync(fd, b, 0, 5, 0); fs.closeSync(fd)
+                    return b.toString("latin1") === "%PDF-"
+                } catch (e) { return false }
+            }
+            let research_paper_promise
+            if (fs.existsSync(research_paper_local_path) && isPdf(research_paper_local_path)) {
+                array[index].research_paper = `assets/pdfs/${local_id}.pdf`
+                research_paper_promise = Promise.resolve()
+            } else {
+                research_paper_promise = downloadFile(research_paper_api_link, research_paper_local_path).then(ok => {
+                    if (ok && isPdf(research_paper_local_path)) {
                         array[index].research_paper = `assets/pdfs/${local_id}.pdf`
-                        resolve()
-                    });
-                }).on('error', (e) => {
-                    console.error(e);
-                    reject()
-                });
-            })
+                        return
+                    }
+                    try { fs.unlinkSync(research_paper_local_path) } catch (e) { /* nothing written */ }
+                    console.error(`Research paper for "${project.project_title}" is not a PDF; keeping the original link`)
+                }).catch(e => console.error(e))
+            }
             image_promises.push(research_paper_promise)
         }
     })
