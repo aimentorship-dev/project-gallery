@@ -19,7 +19,7 @@
     <meta property="og:description" content="This research investigates improving object detection for autonomous vehicles in extreme weather by fine-tuning the YOLOv8n neural network. Starting with a...">
     <meta property="og:url" content="https://research.inspiritai.com/projects/2fcfe3ae3e0ac0b0bd88127727f8578cb517626d.html">
     <meta name="twitter:card" content="summary_large_image">
-    <meta property="og:image" content="https://research.inspiritai.com/assets/images/project_graphics/2fcfe3ae3e0ac0b0bd88127727f8578cb517626d.jpg">
+    <meta property="og:image" content="https://research.inspiritai.com/assets/images/project_graphics/2fcfe3ae3e0ac0b0bd88127727f8578cb517626d-og.jpg">
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -29,7 +29,7 @@
       "url": "https://research.inspiritai.com/projects/2fcfe3ae3e0ac0b0bd88127727f8578cb517626d.html",
       "abstract": "This research investigates improving object detection for autonomous vehicles in extreme weather by fine-tuning the YOLOv8n neural network. Starting with a pretrained model that struggled to recognize vehicles in rain, fog, and snow, we used the DAWN dataset from Kaggle to retrain it, raising detection accuracy from about 22 percent to over 90 percent in poor-visibility conditions while increasing confidence levels by roughly 40 percent, though at the cost of slightly reduced performance and traffic-light detection in normal conditions.",
       "description": "Autonomous vehicles are self-driving vehicles that operate without human assistance. Self-driving vehicles, which include Teslas, BMWs, Waymos, Fords, and Mercedes, struggle to detect objects under extreme weather conditions, such as rain and fog, due to a lack of visibility, thereby significantly...",
-      "image": "https://research.inspiritai.com/assets/images/project_graphics/2fcfe3ae3e0ac0b0bd88127727f8578cb517626d.jpg",
+      "image": "https://research.inspiritai.com/assets/images/project_graphics/2fcfe3ae3e0ac0b0bd88127727f8578cb517626d-og.jpg",
       
       "about": ["Engineering"],
       "keywords": ["Autonomous Vehicles","Engineering"],
@@ -154,7 +154,7 @@
         Enhancement of Autonomous Vehicles During Extreme Weather
       </h1>
       <div class="d-flex w-100 align-items-center">
-        <div class="profile_image" style="background:url('../assets/images/student_imgs/79302f756a3a58d4cd41313a5b4080e394fc38be.png') center 50% / cover no-repeat"></div>
+        <img class="profile_image" src="/assets/images/student_imgs/79302f756a3a58d4cd41313a5b4080e394fc38be-96.webp" srcset="/assets/images/student_imgs/79302f756a3a58d4cd41313a5b4080e394fc38be-96.webp 1x, /assets/images/student_imgs/79302f756a3a58d4cd41313a5b4080e394fc38be-192.webp 2x" width="24" height="24" alt="" decoding="async" onerror="this.onerror=null;this.src='/assets/images/missing_image.png'">
         <div class="text-white font-secondary h5 m-0 ps-3 pt-2 d-flex align-items-center studentMeta">
           Pandian A. 
           
@@ -163,8 +163,12 @@
       </div>
     </div>
     <div class="projectBody">
-      <img class="projectGraphic float-right m-4 mb-2" src="/assets/images/project_graphics/2fcfe3ae3e0ac0b0bd88127727f8578cb517626d.jpg" alt=""
-           data-fallback="linear-gradient(160deg, #2b3a6b 0%, #3f6d8a 100%)"/>
+      
+      <img class="projectGraphic float-right m-4 mb-2" src="/assets/images/project_graphics/2fcfe3ae3e0ac0b0bd88127727f8578cb517626d-960.webp"
+           srcset="/assets/images/project_graphics/2fcfe3ae3e0ac0b0bd88127727f8578cb517626d-480.webp 480w, /assets/images/project_graphics/2fcfe3ae3e0ac0b0bd88127727f8578cb517626d-960.webp 960w" sizes="(max-width: 991px) min(100vw, 22rem), min(40vw, 420px)"
+           width="1200" height="630"
+           alt="" decoding="async" fetchpriority="high" data-fallback="linear-gradient(160deg, #2b3a6b 0%, #3f6d8a 100%)"/>
+      
       <p class="p-4 h5 font-secondary projectDesc">This research investigates improving object detection for autonomous vehicles in extreme weather by fine-tuning the YOLOv8n neural network. Starting with a pretrained model that struggled to recognize vehicles in rain, fog, and snow, we used the DAWN dataset from Kaggle to retrain it, raising detection accuracy from about 22 percent to over 90 percent in poor-visibility conditions while increasing confidence levels by roughly 40 percent, though at the cost of slightly reduced performance and traffic-light detection in normal conditions.</p>
       <hr class="projectDivider ms-4 w-50"/>
       <p class="p-4 projectBody">Autonomous vehicles are self-driving vehicles that operate without human assistance. Self-driving vehicles, which include Teslas, BMWs, Waymos, Fords, and Mercedes, struggle to detect objects under extreme weather conditions, such as rain and fog, due to a lack of visibility, thereby significantly increasing the likelihood of collisions. Although autonomous vehicles have proven to be exceptional in nominal conditions, their poor performance in stormy, foggy, and snowy conditions currently limits their deployment on real roads today. This is important to know because AI can be used to improve the safety of vehicles using algorithms like deep learning via neural networks. In order to answer the question, it involved training and fine-tuning a neural network called the YOLOv8n  model. We loaded a pretrained model, called yolov8n. This model was inaccurate at predicting cars when the vision isn’t clear. However, from the DAWN dataset from Kaggle + YOLOV8, we fine-tuned the model and got it to predict vehicles when the vision wasn’t clear. Initially, the model failed to predict other vehicles in extreme weather conditions, or often predicted other vehicles and objects with low confidence levels. However, after the model was fine-tuned, it was able to increase its prediction confidence level by 40%, also being able to predict 91% of the presented objects, way higher compared to its predicting 22% of its presented objects per image. However, during normal conditions, the fine-tuned model predicted other vehicles at a lower confidence level compared to the original Yolov8n model due to it being trained during extreme weather and not nominal conditions. It was concluded that the fine-tuning of YOLOv8n contributed to the feasibility of object detection during extreme weather conditions, with a 64% increase in objects detected with it being able to detect 94.87% of vehicles and pedestrians,  but led to a 10% decrease in confidence level and &lt;1% decrease in object detection rate under nominal conditions and failed to detect traffic lights, which the non-tuned model could do. This makes it necessary for self-driving providers to build a car with at least two different models: one non-tuned YOLOv8n model, operating during nominal conditions and during traffic lights, and the other being a tuned YOLOv8n model that operates during extreme weather. </p>
@@ -196,13 +200,13 @@
     </div>    
     <div class="involedPeople p-4">
       <div class="d-flex">
-        <div class="profile_image largerProfile" style="background:url('../assets/images/student_imgs/79302f756a3a58d4cd41313a5b4080e394fc38be.png') center 50% / cover no-repeat"></div>
+        <img class="profile_image largerProfile" src="/assets/images/student_imgs/79302f756a3a58d4cd41313a5b4080e394fc38be-192.webp" srcset="/assets/images/student_imgs/79302f756a3a58d4cd41313a5b4080e394fc38be-96.webp 96w, /assets/images/student_imgs/79302f756a3a58d4cd41313a5b4080e394fc38be-192.webp 192w" sizes="100px" width="100" height="100" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/assets/images/missing_image.png'">
         <div class="d-flex flex-column justify-content-center">
           <div class="h4 text-white font-secondary ms-3">Pandian A.</div>
         </div>
       </div>
       <div class="d-flex flex-row-reverse">
-        <div class="profile_image largerProfile" style="background:url(../assets/images/mentor_imgs/a3638f2f762e49748ac4a432468a44b6f5a7457b.png) center 50% / cover no-repeat"></div>
+        <img class="profile_image largerProfile" src="/assets/images/mentor_imgs/a3638f2f762e49748ac4a432468a44b6f5a7457b-192.webp" srcset="/assets/images/mentor_imgs/a3638f2f762e49748ac4a432468a44b6f5a7457b-96.webp 96w, /assets/images/mentor_imgs/a3638f2f762e49748ac4a432468a44b6f5a7457b-192.webp 192w" sizes="100px" width="100" height="100" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/assets/images/missing_image.png'">
         <div class="d-flex flex-column justify-content-center align-items-end">
           <div class="h4 text-white font-secondary me-3">Udgam Goyal</div>
           <div class="h5 text-white font-secondary me-3">MEng CS from MIT, Product Manager at Aurora and prior AI Product Management at Microsoft</div>
@@ -214,7 +218,13 @@
       
         <div class="col-12 col-md-6 col-lg-4 p-2 projectContainer" onclick="window.location='729ac5a4b9a5e1389a85eb5fa4324202cc752bf2.html';">
         <div class="projectSubContainer">
-            <div class="projectImage" style="background:url(&#39;/assets/images/project_graphics/e381903f8e0e9a14c966ee73db8e18fa4dc73980.png&#39;) center 50% / cover no-repeat, linear-gradient(160deg, #2b3a6b 0%, #3f6d8a 100%)">
+            <div class="projectImage" style="background:linear-gradient(160deg, #2b3a6b 0%, #3f6d8a 100%)">
+              
+              <img class="heroImg" src="/assets/images/project_graphics/e381903f8e0e9a14c966ee73db8e18fa4dc73980-960.webp"
+                   srcset="/assets/images/project_graphics/e381903f8e0e9a14c966ee73db8e18fa4dc73980-480.webp 480w, /assets/images/project_graphics/e381903f8e0e9a14c966ee73db8e18fa4dc73980-960.webp 960w" sizes="(min-width: 992px) 33vw, (min-width: 768px) 50vw, 100vw"
+                   width="2175" height="1378"
+                   alt="" loading="lazy" decoding="async" onerror="this.remove()">
+              
               
               <div class="contentContainer w-100 h-100 d-flex flex-column justify-content-end p-3" >
                 <div class="hoverContainer">
@@ -227,7 +237,7 @@
                   </div>
                 </div>
                 <div class="d-flex w-100 align-items-center">
-                  <div class="profile_image" style="background:url('../assets/images/student_imgs/c100ee99327ea9144c621d12294741d2dc993dbc.png') center 50% / cover no-repeat"></div>
+                  <img class="profile_image" src="/assets/images/student_imgs/c100ee99327ea9144c621d12294741d2dc993dbc-96.webp" srcset="/assets/images/student_imgs/c100ee99327ea9144c621d12294741d2dc993dbc-96.webp 1x, /assets/images/student_imgs/c100ee99327ea9144c621d12294741d2dc993dbc-192.webp 2x" width="24" height="24" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/assets/images/missing_image.png'">
                   <div class="text-white font-secondary h5 m-0 ps-3 pt-2">
                     Richa K. 
                     
@@ -235,7 +245,7 @@
                 </div>
                 <div class="d-flex w-100 justify-content-between align-items-center mentorImage">
                   <div class="d-flex align-items-center">
-                    <div class="profile_image" style="background:url('../assets/images/missing_image.png') center 50% / cover no-repeat"></div>
+                    <img class="profile_image" src="/assets/images/missing_image.png" width="24" height="24" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/assets/images/missing_image.png'">
                     <div class="text-white font-secondary h5 m-0 ps-3 pt-2">
                       Mentored by Rami Abi-Akl 
                     </div>
@@ -249,7 +259,13 @@
       
         <div class="col-12 col-md-6 col-lg-4 p-2 projectContainer" onclick="window.location='45611bdae6df0734251d49fe11aba6314fb664c2.html';">
         <div class="projectSubContainer">
-            <div class="projectImage" style="background:url(&#39;/assets/images/project_graphics/7862b7ac17849844c8f68971c047246e6d5157b3.png&#39;) center 50% / cover no-repeat, linear-gradient(160deg, #2b3a6b 0%, #3f6d8a 100%)">
+            <div class="projectImage" style="background:linear-gradient(160deg, #2b3a6b 0%, #3f6d8a 100%)">
+              
+              <img class="heroImg" src="/assets/images/project_graphics/7862b7ac17849844c8f68971c047246e6d5157b3-960.webp"
+                   srcset="/assets/images/project_graphics/7862b7ac17849844c8f68971c047246e6d5157b3-480.webp 480w, /assets/images/project_graphics/7862b7ac17849844c8f68971c047246e6d5157b3-960.webp 960w" sizes="(min-width: 992px) 33vw, (min-width: 768px) 50vw, 100vw"
+                   width="960" height="640"
+                   alt="" loading="lazy" decoding="async" onerror="this.remove()">
+              
               
               <div class="contentContainer w-100 h-100 d-flex flex-column justify-content-end p-3" >
                 <div class="hoverContainer">
@@ -262,7 +278,7 @@
                   </div>
                 </div>
                 <div class="d-flex w-100 align-items-center">
-                  <div class="profile_image" style="background:url('../assets/images/missing_image.png') center 50% / cover no-repeat"></div>
+                  <img class="profile_image" src="/assets/images/missing_image.png" width="24" height="24" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/assets/images/missing_image.png'">
                   <div class="text-white font-secondary h5 m-0 ps-3 pt-2">
                     Shreyes B. 
                     
@@ -270,7 +286,7 @@
                 </div>
                 <div class="d-flex w-100 justify-content-between align-items-center mentorImage">
                   <div class="d-flex align-items-center">
-                    <div class="profile_image" style="background:url('../assets/images/missing_image.png') center 50% / cover no-repeat"></div>
+                    <img class="profile_image" src="/assets/images/missing_image.png" width="24" height="24" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/assets/images/missing_image.png'">
                     <div class="text-white font-secondary h5 m-0 ps-3 pt-2">
                       Mentored by Varsha Sandadi 
                     </div>
@@ -284,7 +300,13 @@
       
         <div class="col-12 col-md-6 col-lg-4 p-2 projectContainer" onclick="window.location='dec39b5fc78709d9127bd63ae43cf80e085e1853.html';">
         <div class="projectSubContainer">
-            <div class="projectImage" style="background:url(&#39;/assets/images/project_graphics/81779e80d4d3f51a28d619c5925cba08474fa2c3.png&#39;) center 50% / cover no-repeat, linear-gradient(160deg, #2b3a6b 0%, #3f6d8a 100%)">
+            <div class="projectImage" style="background:linear-gradient(160deg, #2b3a6b 0%, #3f6d8a 100%)">
+              
+              <img class="heroImg" src="/assets/images/project_graphics/81779e80d4d3f51a28d619c5925cba08474fa2c3-640.webp"
+                   srcset="/assets/images/project_graphics/81779e80d4d3f51a28d619c5925cba08474fa2c3-480.webp 480w, /assets/images/project_graphics/81779e80d4d3f51a28d619c5925cba08474fa2c3-640.webp 640w" sizes="(min-width: 992px) 33vw, (min-width: 768px) 50vw, 100vw"
+                   width="640" height="640"
+                   alt="" loading="lazy" decoding="async" onerror="this.remove()">
+              
               
               <div class="contentContainer w-100 h-100 d-flex flex-column justify-content-end p-3" >
                 <div class="hoverContainer">
@@ -297,7 +319,7 @@
                   </div>
                 </div>
                 <div class="d-flex w-100 align-items-center">
-                  <div class="profile_image" style="background:url('../assets/images/missing_image.png') center 50% / cover no-repeat"></div>
+                  <img class="profile_image" src="/assets/images/missing_image.png" width="24" height="24" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/assets/images/missing_image.png'">
                   <div class="text-white font-secondary h5 m-0 ps-3 pt-2">
                     Zachary R. 
                     
@@ -305,7 +327,7 @@
                 </div>
                 <div class="d-flex w-100 justify-content-between align-items-center mentorImage">
                   <div class="d-flex align-items-center">
-                    <div class="profile_image" style="background:url('../assets/images/mentor_imgs/b80905554784ba740eb49afb192e8f2b990e2ad0.png') center 50% / cover no-repeat"></div>
+                    <img class="profile_image" src="/assets/images/mentor_imgs/b80905554784ba740eb49afb192e8f2b990e2ad0-96.webp" srcset="/assets/images/mentor_imgs/b80905554784ba740eb49afb192e8f2b990e2ad0-96.webp 1x, /assets/images/mentor_imgs/b80905554784ba740eb49afb192e8f2b990e2ad0-192.webp 2x" width="24" height="24" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/assets/images/missing_image.png'">
                     <div class="text-white font-secondary h5 m-0 ps-3 pt-2">
                       Mentored by Zachary Gittelman 
                     </div>

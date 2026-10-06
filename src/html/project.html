@@ -84,7 +84,7 @@
         {{ctx.project_title}}
       </h1>
       <div class="d-flex w-100 align-items-center">
-        <div class="profile_image" style="background:url('../{{ ctx.student_image }}') center 50% / cover no-repeat"></div>
+        <img class="profile_image" src="{{ ctx.student_avatar.src }}"{% if ctx.student_avatar.srcset %} srcset="{{ ctx.student_avatar.srcset }}"{% endif %} width="24" height="24" alt="" decoding="async" onerror="this.onerror=null;this.src='/assets/images/missing_image.png'">
         <div class="text-white font-secondary h5 m-0 ps-3 pt-2 d-flex align-items-center studentMeta">
           {{ ctx.student_name }} 
           {% if ctx.project_yr %}
@@ -113,8 +113,14 @@
       </div>
     </div>
     <div class="projectBody">
-      <img class="projectGraphic float-right m-4 mb-2" src="{{ ctx.hero_src }}" alt=""
-           data-fallback="{{ ctx.hero_fallback }}"/>
+      {% if ctx.hero_img %}
+      <img class="projectGraphic float-right m-4 mb-2" src="{{ ctx.hero_img.src }}"
+           {% if ctx.hero_img.srcset %}srcset="{{ ctx.hero_img.srcset }}" sizes="(max-width: 991px) min(100vw, 22rem), min(40vw, 420px)"{% endif %}
+           {% if ctx.hero_img.w and ctx.hero_img.h %}width="{{ ctx.hero_img.w }}" height="{{ ctx.hero_img.h }}"{% endif %}
+           alt="" decoding="async" fetchpriority="high" data-fallback="{{ ctx.hero_fallback }}"/>
+      {% else %}
+      <div class="projectGraphic float-right m-4 mb-2 is-missing" style="background:{{ ctx.hero_fallback }}" aria-hidden="true"></div>
+      {% endif %}
       <p class="p-4 h5 font-secondary projectDesc">{{ ctx.headline }}</p>
       <hr class="projectDivider ms-4 w-50"/>
       <p class="p-4 projectBody">{{ ctx.project_desc }}</p>
@@ -160,13 +166,13 @@
     </div>    
     <div class="involedPeople p-4">
       <div class="d-flex">
-        <div class="profile_image largerProfile" style="background:url('../{{ ctx.student_image }}') center 50% / cover no-repeat"></div>
+        <img class="profile_image largerProfile" src="{{ ctx.student_avatar.large }}"{% if ctx.student_avatar.srcset_w %} srcset="{{ ctx.student_avatar.srcset_w }}" sizes="100px"{% endif %} width="100" height="100" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/assets/images/missing_image.png'">
         <div class="d-flex flex-column justify-content-center">
           <div class="h4 text-white font-secondary ms-3">{{ ctx.student_name }}</div>
         </div>
       </div>
       <div class="d-flex flex-row-reverse">
-        <div class="profile_image largerProfile" style="background:url(../{{ ctx.mentor_image }}) center 50% / cover no-repeat"></div>
+        <img class="profile_image largerProfile" src="{{ ctx.mentor_avatar.large }}"{% if ctx.mentor_avatar.srcset_w %} srcset="{{ ctx.mentor_avatar.srcset_w }}" sizes="100px"{% endif %} width="100" height="100" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/assets/images/missing_image.png'">
         <div class="d-flex flex-column justify-content-center align-items-end">
           <div class="h4 text-white font-secondary me-3">{{ ctx.mentor_name }}</div>
           <div class="h5 text-white font-secondary me-3">{{ ctx.mentor_title }}</div>
@@ -179,6 +185,12 @@
         <div class="col-12 col-md-6 col-lg-4 p-2 projectContainer" onclick="window.location='{{ project.project_id }}.html';">
         <div class="projectSubContainer">
             <div class="projectImage" style="background:{{ project.hero_bg }}">
+              {% if project.hero_img %}
+              <img class="heroImg" src="{{ project.hero_img.src }}"
+                   {% if project.hero_img.srcset %}srcset="{{ project.hero_img.srcset }}" sizes="(min-width: 992px) 33vw, (min-width: 768px) 50vw, 100vw"{% endif %}
+                   {% if project.hero_img.w and project.hero_img.h %}width="{{ project.hero_img.w }}" height="{{ project.hero_img.h }}"{% endif %}
+                   alt="" loading="lazy" decoding="async" onerror="this.remove()">
+              {% endif %}
               {% if project.published == true %}
                 <div class="ribbonRelatedProjectContainer">
                   <span class="material-symbols-outlined ribbonRelatedProjectIcon">workspace_premium</span>
@@ -195,7 +207,7 @@
                   </div>
                 </div>
                 <div class="d-flex w-100 align-items-center">
-                  <div class="profile_image" style="background:url('../{{ project.student_image }}') center 50% / cover no-repeat"></div>
+                  <img class="profile_image" src="{{ project.student_avatar.src }}"{% if project.student_avatar.srcset %} srcset="{{ project.student_avatar.srcset }}"{% endif %} width="24" height="24" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/assets/images/missing_image.png'">
                   <div class="text-white font-secondary h5 m-0 ps-3 pt-2">
                     {{ project.student_name }} 
                     {% if project.project_yr %}
@@ -205,7 +217,7 @@
                 </div>
                 <div class="d-flex w-100 justify-content-between align-items-center mentorImage">
                   <div class="d-flex align-items-center">
-                    <div class="profile_image" style="background:url('../{{ project.mentor_image }}') center 50% / cover no-repeat"></div>
+                    <img class="profile_image" src="{{ project.mentor_avatar.src }}"{% if project.mentor_avatar.srcset %} srcset="{{ project.mentor_avatar.srcset }}"{% endif %} width="24" height="24" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='/assets/images/missing_image.png'">
                     <div class="text-white font-secondary h5 m-0 ps-3 pt-2">
                       Mentored by {{ project.mentor_name }} 
                     </div>

@@ -77,6 +77,9 @@ button {
     float: right !important;
     width: min(40%, 420px);
     max-width: 100%;
+    // A hotlinked hero arrives without width/height attributes, so reserve some
+    // room rather than letting the text reflow when the remote bytes land.
+    &:not([width]) { min-height: 200px; }
     // Height follows the picture's own proportions. It used to be capped by a
     // max-height with object-fit:cover, which cropped the image to whatever box
     // the surrounding text happened to leave.

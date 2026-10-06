@@ -3,7 +3,73 @@ const fs = require("fs");
 const webpack = require('webpack');
 const NunjucksWebpackPlugin = require("nunjucks-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
-const { heroBackground, heroGradient, heroImageUrl } = require('./src/js/heroBackground.js');
+const { heroGradient, heroImageUrl } = require('./src/js/heroBackground.js');
+
+// Resized WebP variants written by optimizeImages.js (it runs before webpack in
+// prod-hydrate / build). Keyed by the original's path under dist, e.g.
+// "assets/images/student_imgs/<id>.png" -> { w, h, variants: [{ w, h, file }] }.
+// Only the variants are shipped; the multi-megabyte originals stay in the build.
+const MANIFEST_PATH = path.join(__dirname, 'image-manifest.json');
+const IMAGE_MANIFEST = fs.existsSync(MANIFEST_PATH) ? JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf8')) : null;
+if (!IMAGE_MANIFEST) {
+  console.warn('WARNING: image-manifest.json not found - run `npm run optimize-images`. '
+    + 'Falling back to shipping the original images.');
+}
+const PLACEHOLDER_AVATAR = '/assets/images/missing_image.png';
+
+function variantsFor(relPath) {
+  if (!relPath || /^https?:\/\//i.test(relPath)) return null;
+  return (IMAGE_MANIFEST && IMAGE_MANIFEST[String(relPath).replace(/^\//, '')]) || null;
+}
+
+// Hero <img> for a card or project page: src + srcset from the manifest; the raw
+// hotlink for the few heroes that would not download (they lazy-load and vanish on
+// error); null when there is no usable picture, so only the gradient tile shows.
+function heroImage(project) {
+  const url = heroImageUrl(project);
+  if (!url) return null;
+  const m = variantsFor(url);
+  if (!m) {
+    if (/^https?:\/\//i.test(url)) return { src: url, srcset: '', w: project.hero_w || 0, h: project.hero_h || 0 };
+    if (IMAGE_MANIFEST) return null;                       // local file sharp could not decode
+    return { src: '/' + url.replace(/^\//, ''), srcset: '', w: project.hero_w || 0, h: project.hero_h || 0 };
+  }
+  const vs = m.variants;
+  // Nothing on the page renders a hero wider than ~420 CSS px (project page) or one
+  // masonry column, so 960px covers 2x screens; the 1440 tier exists for og:image.
+  const forImg = vs.filter(v => v.w <= 960);
+  const pick = forImg.length ? forImg : vs;
+  const mid = pick[Math.min(1, pick.length - 1)];
+  return {
+    src: '/' + mid.file,
+    // a single pass-through variant (AVIF) has no measured width: plain src only
+    srcset: pick.length > 1 ? pick.map(v => '/' + v.file + ' ' + v.w + 'w').join(', ') : '',
+    w: m.w || project.hero_w || 0, h: m.h || project.hero_h || 0,
+    large: '/' + vs[vs.length - 1].file,
+    // JPEG rendition for link previews: LinkedIn/WhatsApp scrapers do not render WebP
+    og: m.og ? '/' + m.og : '/' + vs[vs.length - 1].file,
+  };
+}
+
+// 24px round avatar: the 96px variant with 192px for 2x screens, or the placeholder.
+// Every branch returns the same shape - the templates read .large / .srcset_w too.
+function avatarImage(relPath) {
+  const m = variantsFor(relPath);
+  if (!m) {
+    const src = (!IMAGE_MANIFEST && relPath && !/missing_image/.test(relPath))
+      ? '/' + String(relPath).replace(/^\//, '')
+      : PLACEHOLDER_AVATAR;
+    return { src: src, srcset: '', srcset_w: '', large: src };
+  }
+  const vs = m.variants;
+  return {
+    src: '/' + vs[0].file,
+    // density form for the 24px circles; width form (+ sizes) for the 100px ones
+    srcset: vs.length > 1 ? '/' + vs[0].file + ' 1x, /' + vs[1].file + ' 2x' : '',
+    srcset_w: vs.map(v => '/' + v.file + ' ' + v.w + 'w').join(', '),
+    large: '/' + vs[vs.length - 1].file,
+  };
+}
 
 let data = JSON.parse(fs.readFileSync(path.join(__dirname, 'data.json'), 'utf8'));
 // Airtable holds a few projects twice (same title + student, so the same derived
@@ -49,6 +115,13 @@ data.projects = mergeDuplicateProjects(data.projects);
 // to dist has to be the deduped one too - otherwise the duplicate cards come back.
 // Snapshot it here, before related_proj is expanded into objects further down
 // (that turns the structure circular and unserialisable).
+// The image fields the cards render from, attached before the snapshot so the
+// client-side re-render (which reads data.json) builds exactly what the server did.
+data.projects.forEach(function (item) {
+  item.hero_img = heroImage(item);
+  item.student_avatar = avatarImage(item.student_image);
+  item.mentor_avatar = avatarImage(item.mentor_image);
+});
 const DEDUPED_DATA_JSON = JSON.stringify(data);
 
 // ---------------------------------------------------------------- SEO
@@ -126,8 +199,30 @@ function pruneOrphanPages(projects) {
   if (removed) console.log('SEO: pruned ' + removed + ' orphaned project pages');
 }
 
+// dist is never cleaned, so the full-size originals (and variants of projects since
+// removed) would keep being served from dist/assets/images - now with a month-long
+// cache header. Keep only what the manifest says is current.
+function pruneStaleImages() {
+  if (!IMAGE_MANIFEST) return;
+  const keep = {};
+  Object.keys(IMAGE_MANIFEST).forEach(function (k) {
+    IMAGE_MANIFEST[k].variants.forEach(function (v) { keep[v.file] = 1; });
+    if (IMAGE_MANIFEST[k].og) keep[IMAGE_MANIFEST[k].og] = 1;
+  });
+  let removed = 0;
+  ['project_graphics', 'mentor_imgs', 'student_imgs'].forEach(function (folder) {
+    const dir = path.resolve(__dirname, 'dist', 'assets', 'images', folder);
+    if (!fs.existsSync(dir)) return;
+    fs.readdirSync(dir).forEach(function (f) {
+      if (!keep['assets/images/' + folder + '/' + f]) { fs.unlinkSync(path.join(dir, f)); removed++; }
+    });
+  });
+  if (removed) console.log('images: pruned ' + removed + ' stale files from dist/assets/images');
+}
+
 writeSeoFiles(data.projects);
 pruneOrphanPages(data.projects);
+pruneStaleImages();
 
 let projects_raw = JSON.parse(JSON.stringify(data.projects))
 let prodect_id_map = {}
@@ -137,15 +232,21 @@ projects_raw.forEach(proj => {
 })
 
 data.projects.forEach((item, index) => {
-  data.projects[index].hero_bg = heroBackground(item);
+  // Gradient only: the picture itself is now an <img> layered on top (see
+  // heroImage above), not a CSS background that downloads at full size.
+  data.projects[index].hero_bg = heroGradient(item);
   data.projects[index].hero_fallback = heroGradient(item);
   data.projects[index].hero_src = heroImageUrl(item);
   // Absolute URL for og:image - social scrapers will not resolve a root-relative
   // path. Left empty when the project has no picture so no broken card is shared.
-  const heroSrc = data.projects[index].hero_src;
+  const heroSrc = item.hero_img ? (item.hero_img.og || item.hero_img.large || item.hero_img.src) : '';
   // Same clamp createProjectElement() applies, so the server-rendered cards have
-  // the identical height and the JS re-render causes no layout shift.
-  const ratio = (item.hero_w && item.hero_h) ? item.hero_h / item.hero_w : 0.87;
+  // the identical height and the JS re-render causes no layout shift. The ratio
+  // comes from the picture actually shown (an override figure differs from the
+  // dead download getData measured), falling back to getData's numbers for hotlinks.
+  const img = item.hero_img;
+  const ratio = (img && img.w && img.h) ? img.h / img.w
+    : (item.hero_w && item.hero_h) ? item.hero_h / item.hero_w : 0.87;
   data.projects[index].card_ratio = Math.min(1.15, Math.max(0.65, ratio)).toFixed(3);
   data.projects[index].og_image = !heroSrc ? ''
     : (/^https?:\/\//i.test(heroSrc) ? heroSrc : SITE + heroSrc);
@@ -257,9 +358,16 @@ data.projects.forEach(item => entry_points[item.project_id] = "./src/js/project.
     }),
     // Removed data bundling - data is now loaded dynamically via dataService
     new CopyWebpackPlugin([
-      {from:'src/assets/',to:'assets/'},
+      // The hero/avatar originals stay out of dist; only the resized WebP variants
+      // ship (see optimizeImages.js). Without a manifest everything is copied as before.
+      {from:'src/assets/',to:'assets/',
+       ignore: IMAGE_MANIFEST ? ['**/project_graphics/**', '**/mentor_imgs/**', '**/student_imgs/**'] : []},
+      {from:'src/assets/images/project_graphics/*.{webp,avif}', to:'assets/images/project_graphics/', flatten: true},
+      {from:'src/assets/images/project_graphics/*-og.jpg',      to:'assets/images/project_graphics/', flatten: true},
+      {from:'src/assets/images/mentor_imgs/*.{webp,avif}',      to:'assets/images/mentor_imgs/',      flatten: true},
+      {from:'src/assets/images/student_imgs/*.{webp,avif}',     to:'assets/images/student_imgs/',     flatten: true},
       {from:'data.json',to:'data.json',transform: () => DEDUPED_DATA_JSON}
-    ]), 
+    ]),
   ]
  };
 

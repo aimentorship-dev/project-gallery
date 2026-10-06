@@ -96,17 +96,42 @@ function downloadFile(fileUrl, localPath, attempt = 0) {
 
             ensureDirectoryExists(localPath)
 
+            // A connection that drops mid-body used to leave a truncated file behind,
+            // and because an existing file is reused on the next run, 125 avatars were
+            // 20 KB stubs of 3000px photos forever. Check the byte count against
+            // Content-Length and refuse anything that is not an image.
+            const expected = parseInt(res.headers["content-length"], 10)
+            const contentType = String(res.headers["content-type"] || "")
+            if (/^text\/html/i.test(contentType)) {
+                console.error(`Not an image (${contentType}): ${fileUrl}`)
+                res.resume()
+                return resolve(false)
+            }
+            let received = 0
+            let settled = false
+            const fail = reason => {
+                if (settled) return
+                settled = true
+                console.error(`${reason}: ${fileUrl}`)
+                fs.unlink(localPath, () => resolve(false))
+            }
+
             const fileStream = fs.createWriteStream(localPath)
+            res.on("data", chunk => { received += chunk.length })
+            res.on("aborted", () => fail("Connection dropped mid-download"))
+            res.on("error", err => fail(`Response error (${err.message})`))
             res.pipe(fileStream)
 
             fileStream.on("finish", () => {
+                if (settled) return
+                if (!isNaN(expected) && received !== expected) {
+                    return fail(`Truncated download (${received} of ${expected} bytes)`)
+                }
+                settled = true
                 fileStream.close(() => resolve(true))
             })
 
-            fileStream.on("error", err => {
-                console.error(`Error writing file ${localPath}`, err)
-                fs.unlink(localPath, () => resolve(false))
-            })
+            fileStream.on("error", err => fail(`Error writing file ${localPath} (${err.message})`))
         })
 
         // Without this, a host that accepts the connection but never answers hangs the
@@ -115,7 +140,7 @@ function downloadFile(fileUrl, localPath, attempt = 0) {
         request.setTimeout(DOWNLOAD_TIMEOUT_MS, () => {
             console.error(`Timed out after ${DOWNLOAD_TIMEOUT_MS}ms downloading ${fileUrl}`)
             request.destroy()
-            resolve(false)
+            fs.unlink(localPath, () => resolve(false))
         })
 
         request.on("error", err => {
@@ -218,6 +243,20 @@ function imageSize(file) {
     return null
 }
 
+// AVIF/HEIC (ISO base media "ftyp" box) - imageSize() does not parse these, but an
+// AVIF is a real picture browsers render, so keep it.
+function isHeifFamily(file) {
+    try {
+        const fd = fs.openSync(file, "r")
+        const buf = Buffer.alloc(12)
+        fs.readSync(fd, buf, 0, 12, 0)
+        fs.closeSync(fd)
+        return buf.slice(4, 8).toString("latin1") === "ftyp"
+    } catch (e) {
+        return false
+    }
+}
+
 function getLocalImagePaths(identifier, folder) {
     const hash = crypto.createHash("sha1").update(identifier).digest("hex")
     const fileName = `${hash}.png`
@@ -253,8 +292,15 @@ function resolveImageDownload(link, type) {
 
     const { absolute, relative } = getLocalImagePaths(identifier, folder)
 
+    // Reuse a previous download only if it is actually an image. Stubs (an HTML
+    // error page or a truncated file saved under the .png name) used to be kept
+    // forever because this check never looked inside them.
     if (fs.existsSync(absolute)) {
-        return Promise.resolve(relative)
+        if (imageSize(absolute) || isHeifFamily(absolute)) {
+            return Promise.resolve(relative)
+        }
+        console.error(`Discarding unusable cached image ${relative}; downloading again`)
+        try { fs.unlinkSync(absolute) } catch (e) { /* already gone */ }
     }
 
     const downloadUrl = driveId

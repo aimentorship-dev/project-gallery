@@ -19,8 +19,17 @@ class DataService {
     };
   }
 
+  // Both loaders below call this; share one network request between them rather
+  // than downloading the ~1 MB data.json twice on every visit.
+  fetchDataJson() {
+    if (!this._dataJson) {
+      this._dataJson = this._fetchDataJson().catch(err => { this._dataJson = null; throw err; });
+    }
+    return this._dataJson;
+  }
+
   // Helper method to fetch data.json with multiple path attempts
-  async fetchDataJson() {
+  async _fetchDataJson() {
     const paths = [
       '/data.json',
       './data.json', 

@@ -20,7 +20,7 @@ empty commit:
 ./reloadWebsite.sh
 ```
 
-The build runs `npm run prod-hydrate` (`getData.js` → `webpack`) and publishes
+The build runs `npm run prod-hydrate` (`getData.js` → `optimizeImages.js` → `webpack`) and publishes
 `dist/`. Routing, the `data.json` content type, and the SPA fallback are
 configured in `vercel.json`.
 
@@ -34,7 +34,9 @@ npm install
 npm run prod-hydrate
 ```
 
-`npm run watch` rebuilds on change once `data.json` exists.
+`npm run watch` rebuilds on change once `data.json` exists (it regenerates the
+resized WebP variants first - `optimizeImages.js` writes them next to the originals
+plus `image-manifest.json`; only the variants ship, see `webpack.config.js`).
 
 ## Environment
 

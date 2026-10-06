@@ -4,13 +4,18 @@ import din_condensed2 from "../assets/fonts/DIN Condensed Bold.otf";
 import fatfrank from "../assets/fonts/FatFrank-Regular.otf";
 import fatfrank2 from "../assets/fonts/FatFrank-Regular.ttf";
 import dataService from "./dataService.js";
-import { heroBackground } from "./heroBackground.js";
+import { heroGradient } from "./heroBackground.js";
+import { heroImgTag, avatarTag } from "./cardImages.js";
 
 // import 'bootstrap';
 
 let active_filters = []
 let current_category = "Published Papers and Science Fairs"
 let isInitialized = false
+// renderResults() is declared inside the load handler below (it closes over the
+// search state there), but renderAllProjects() at module level needs it too. The
+// handler publishes it through this binding; until then it is a harmless no-op.
+let renderResultsImpl = () => {}
 
 // Show loading state
 // Assigned inside the window-load callback below. It has to be declared out here
@@ -137,7 +142,7 @@ function renderAllProjects(projects) {
       err.textContent = 'Sorry, no projects match those filters :(';
       gallery.insertBefore(err, gallery.firstChild);
     }
-    renderResults();
+    renderResultsImpl();
     return;
   }
 
@@ -157,7 +162,7 @@ function renderAllProjects(projects) {
   });
   
   // Apply current filters
-  renderResults();
+  renderResultsImpl();
 }
 
 // Create a project element
@@ -166,7 +171,9 @@ function createProjectElement(project) {
   projectElement.className = `projectContainer`;
   // Same masonry sizing as the main gallery - height follows the picture's real
   // shape, clamped so the overlay text still fits.
-  const ratio = (project.hero_w && project.hero_h) ? project.hero_h / project.hero_w : 0.87;
+  const img = project.hero_img;
+  const ratio = (img && img.w && img.h) ? img.h / img.w
+    : (project.hero_w && project.hero_h) ? project.hero_h / project.hero_w : 0.87;
   projectElement.style.setProperty('--card-ratio', Math.min(1.15, Math.max(0.65, ratio)).toFixed(3));
   projectElement.setAttribute('data-id', project.project_id);
   projectElement.onclick = () => window.location = `projects/${project.project_id}.html`;
@@ -182,7 +189,8 @@ function createProjectElement(project) {
   
   projectElement.innerHTML = `
     <div class="projectSubContainer">
-      <div class="projectImage" style="background:${heroBackground(project)}">
+      <div class="projectImage" style="background:${heroGradient(project)}">
+        ${heroImgTag(project)}
         ${publishedRibbon}
         <div class="${contentHeight} contentContainer w-100 d-flex flex-column justify-content-end p-2">
           <div class="hoverContainer">
@@ -195,7 +203,7 @@ function createProjectElement(project) {
             </div>
           </div>
           <div class="d-flex w-100 align-items-center">
-            <div class="profile_image" style="background:url('${project.student_image}') center 50% / cover no-repeat"></div>
+            ${avatarTag(project.student_avatar)}
             <div class="meta-text text-white font-secondary m-0 ps-2 pt-1">
               ${project.student_name}
               ${project.project_yr ? `| ${project.project_quarter} ${project.project_yr}` : ''}
@@ -204,7 +212,7 @@ function createProjectElement(project) {
           <div class="d-flex w-100 justify-content-between align-items-center mentorImage">
             ${project.mentor_name && String(project.mentor_name).trim() && String(project.mentor_name).toLowerCase() !== 'undefined' ? `
               <div class="d-flex align-items-center">
-                <div class="profile_image" style="background:url('${project.mentor_image}') center 50% / cover no-repeat"></div>
+                ${avatarTag(project.mentor_avatar)}
                 <div class="meta-text text-white font-secondary m-0 ps-2 pt-1">
                   Mentored by ${project.mentor_name}
                 </div>
@@ -234,6 +242,7 @@ function showErrorState() {
 }
 
 window.addEventListener('load', (event) => {
+  renderResultsImpl = renderResults;   // function declaration below is hoisted
   // Initialize the app with progressive loading
   initializeApp();
 

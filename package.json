@@ -7,12 +7,13 @@
     "./published.js": "./src/js/published.js"
   },
   "scripts": {
-    "build": "npx webpack",
-    "prod-build": "npx webpack",
+    "build": "npm run optimize-images && npx webpack",
+    "prod-build": "npm run optimize-images && npx webpack",
     "load-data": "node getData.js",
     "prod-hydrate": "npm run load-data && npm run prod-build",
-    "watch": "npx webpack --watch",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "watch": "npm run optimize-images && npx webpack --watch",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "optimize-images": "node optimizeImages.js"
   },
   "repository": {
     "type": "git",
@@ -40,6 +41,7 @@
     "nunjucks": "^3.2.3",
     "sass": "^1.54.9",
     "sass-loader": "^10.1.1",
+    "sharp": "^0.33.5",
     "style-loader": "^1.3.0",
     "webpack-dev-server": "^4.11.1"
   },

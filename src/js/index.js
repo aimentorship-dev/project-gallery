@@ -4,7 +4,8 @@ import din_condensed2 from "../assets/fonts/DIN Condensed Bold.otf";
 import fatfrank from "../assets/fonts/FatFrank-Regular.otf";
 import fatfrank2 from "../assets/fonts/FatFrank-Regular.ttf";
 import dataService from "./dataService.js";
-import { heroBackground } from "./heroBackground.js";
+import { heroGradient } from "./heroBackground.js";
+import { heroImgTag, avatarTag } from "./cardImages.js";
 
 // import 'bootstrap';
 
@@ -168,7 +169,9 @@ function createProjectElement(project) {
   // Google-Images style masonry:each card keeps the column width but takes its height
   // from the picture's real shape, measured at build time. Clamped so a very wide
   // image still leaves room for the title, student and mentor overlay.
-  const ratio = (project.hero_w && project.hero_h) ? project.hero_h / project.hero_w : 0.87;
+  const img = project.hero_img;
+  const ratio = (img && img.w && img.h) ? img.h / img.w
+    : (project.hero_w && project.hero_h) ? project.hero_h / project.hero_w : 0.87;
   projectElement.style.setProperty('--card-ratio', Math.min(1.15, Math.max(0.65, ratio)).toFixed(3));
   projectElement.setAttribute('data-id', project.project_id);
   projectElement.onclick = () => window.location = `projects/${project.project_id}.html`;
@@ -184,7 +187,8 @@ function createProjectElement(project) {
   
   projectElement.innerHTML = `
     <div class="projectSubContainer">
-      <div class="projectImage" style="background:${heroBackground(project)}">
+      <div class="projectImage" style="background:${heroGradient(project)}">
+        ${heroImgTag(project)}
         ${publishedRibbon}
         <div class="${contentHeight} contentContainer w-100 d-flex flex-column justify-content-end p-3">
           <div class="hoverContainer">
@@ -197,7 +201,7 @@ function createProjectElement(project) {
             </div>
           </div>
           <div class="d-flex w-100 align-items-center">
-            <div class="profile_image" style="background:url('${project.student_image}') center 50% / cover no-repeat"></div>
+            ${avatarTag(project.student_avatar)}
             <div class="text-white font-secondary h5 m-0 ps-3 pt-2">
               ${project.student_name}
               ${project.project_yr ? `| ${project.project_quarter} ${project.project_yr}` : ''}
@@ -205,7 +209,7 @@ function createProjectElement(project) {
           </div>
           <div class="d-flex w-100 justify-content-between align-items-center mentorImage">
             <div class="d-flex align-items-center">
-              <div class="profile_image" style="background:url('${project.mentor_image}') center 50% / cover no-repeat"></div>
+              ${avatarTag(project.mentor_avatar)}
               <div class="text-white font-secondary h5 m-0 ps-3 pt-2">
                 Mentored by ${project.mentor_name}
               </div>

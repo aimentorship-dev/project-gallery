@@ -184,6 +184,25 @@ nav{
     width:24px;
     height:24px;
     min-width: 24px;
+    /* now an <img> (lazy-loaded, 96px variant) rather than a CSS background */
+    object-fit: cover;
+    display: block;
+    background: #e9e9ef;
+}
+
+/* Card hero: an <img> layered over the subject gradient (the card's background),
+   beneath the dark scrim and the text. It used to be the background itself, which
+   made every visitor download the full-size original for all ~200 cards. */
+.projectImage > .heroImg{
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -2;
+    display: block;
+    pointer-events: none;
+    border-radius: inherit;
 }
 
 input::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
