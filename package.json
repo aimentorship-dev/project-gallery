@@ -7,13 +7,14 @@
     "./published.js": "./src/js/published.js"
   },
   "scripts": {
-    "build": "npm run optimize-images && npx webpack",
-    "prod-build": "npm run optimize-images && npx webpack",
+    "build": "npm run optimize-images && npx webpack && npm run check-secrets",
+    "prod-build": "npm run optimize-images && npx webpack && npm run check-secrets",
     "load-data": "node getData.js",
     "prod-hydrate": "npm run load-data && npm run prod-build",
     "watch": "npm run optimize-images && npx webpack --watch",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "optimize-images": "node optimizeImages.js"
+    "optimize-images": "node optimizeImages.js",
+    "check-secrets": "node checkSecrets.js"
   },
   "repository": {
     "type": "git",
